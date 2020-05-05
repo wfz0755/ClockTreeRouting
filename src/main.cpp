@@ -5,6 +5,8 @@ using namespace std;
 
 
 int main(int argc, char *argv[]){
+    Setting setting;
+    
     cout << "Handling Task One: CLOCK SRC-TAPS ROUTING " << endl;
     cout << "Input file name" << argv[1] << endl;
     cout << "Output file name" << argv[2] << endl;

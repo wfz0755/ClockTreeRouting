@@ -17,11 +17,11 @@ public:
     gridPoint center;
     shared_ptr<segment> ch[2];
     shared_ptr<segment> par;
-    int id;
+    int id; // unique id for each segment
 
     segment(gridPoint u, gridPoint v) : p1(u), p2(v) {}
     bool isLeaf() { return p1 == p2; }
-    bool operator==(const segment& rhs) const { return (p1 == rhs.p1 && p2 == rhs.y && vid == rhs.vid); }
+    bool operator==(const segment& rhs) const { return (p1 == rhs.p1 && p2 == rhs.p2  && id == rhs.id); }
 };
 
 class Router {
