@@ -13,5 +13,6 @@
 #include <unordered_map>
 #include <map>
 #include <cmath>
+#include <functional>
 #include "stdafx.h"
 #include "dataanalysis.h"

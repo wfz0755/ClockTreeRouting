@@ -3,7 +3,6 @@
 #include "Setting.h"
 using namespace std;
 
-//Nearest matching + DME
 Setting setting;
 
 int main(int argc, char *argv[]){
