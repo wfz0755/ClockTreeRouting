@@ -95,9 +95,9 @@ class Benchmarks:
 
 # all benchmarks
 all_benchmarks = Benchmarks()
-all_benchmarks.add('test{}.txt', 't{}', ['1', '2', '3'])
+all_benchmarks.add('test{}.txt', 't{}', ['1', '2', '3','4','5','6','7','8','9','10'])
 # all_benchmarks.add_with_id_ailas('test{}.txt', 't{}', ['1', '2', '3'], ['1', '2', '3'])
 
 
 
-all_benchmarks.add_set('all', ['t1', 't2','t3'])
+all_benchmarks.add_set('all', ['t1', 't2','t3','t4','t5','t6','t7','t8','t9','t10'])

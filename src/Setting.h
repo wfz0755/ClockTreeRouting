@@ -12,7 +12,7 @@ public:
     string output_file_name;
     string benchmark_path = "../benchmarks";
     string topo_choice; // NS, CL, RGM
-    int metric = 2; // 1=> L1, 2=>L2(euclidean)
+    int metric = 1; // 1=> L1, 2=>L2(euclidean)
     int refine_M = 6; // by default
 };
 extern Setting setting;

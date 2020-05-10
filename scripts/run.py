@@ -14,7 +14,7 @@ parser.add_argument('benchmarks', choices=all_benchmarks.get_choices(), nargs='+
                     help='Choices are ' + ', '.join(all_benchmarks.get_choices()))
 parser.add_argument('-p', '--benchmark_path',default="../benchmark")
 parser.add_argument('--topo', choices=['NS', 'CL', 'RGM'], default=['NS'])
-parser.add_argument('--metric', type=int ,default=2) # L1 or L2 distance
+# parser.add_argument('--metric', type=int ,default=2) # L1 or L2 distance
 # parser.add_argument('--refine',dest='refine', action='store_true')#apply refinement or not
 
 parser.add_argument('--outfile', type=str,default="CTR.sol")
