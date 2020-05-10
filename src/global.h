@@ -13,4 +13,5 @@
 #include <unordered_map>
 #include <map>
 #include <cmath>
-#include "alglib/src/dataanalysis.h"
+#include "stdafx.h"
+#include "dataanalysis.h"
