@@ -43,8 +43,8 @@ public:
 
 class Router {
 public:
-    int MAX_RUNTIME = 3600;
-    int NUM_TAPS = 4;
+    int MAX_RUNTIME = 3600; // test 1
+    int NUM_TAPS = 4; //test 1
     vector<TAP> taps;
     unordered_map<int, segment> segmentsMap;  // set of segments
 
@@ -54,6 +54,7 @@ public:
     void readInput();
     // To generate topology(try L1 based metric and L2 based ones)
     void NS();          // nearest neighbor topology
+    void HC();          // Agglomerative  Hierarchical Clustering  
     void CL();          // clustering based algorithm
     void Refinement();  // clustering with refinement 4<= m <=6 in the original paper
     void RGM();         // Recursive Geometric Matching

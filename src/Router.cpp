@@ -1,9 +1,15 @@
 #include "Router.h"
 #include "Setting.h"
 
-using namespace std;
+using std::cout;
+using std::endl;
 void Router::init() {
     // read input and build data structure
+    readInput();
+    
+    
+}
+void Router::readInput() {
     ifstream fin(setting.input_file_name);
     if (fin.fail()) {
         cout << "Fail to open file:" << setting.input_file_name << endl;
@@ -39,7 +45,6 @@ void Router::init() {
     }
     cout << "Finish Reading input" << endl;
 }
-void Router::readInput() {}
 
 // Recursive Geometric Matching
 void Router::RGM() {
@@ -49,9 +54,24 @@ void Router::RGM() {
 // nearest neighbor topology
 void Router::NS() {}
 
+// Agglomerative  Hierarchical Clustering  
+void Router::HC(){
+
+
+
+}
+
 // Deferred-Merge Embedding
 void Router::DME() {}
 
-void Router::route() {}
+void Router::route() {
+    HC(); // try hierarchical clustering
+    DME();
+    cout << "Finish Routing" << endl;
+}
 
-void Router::writeSolution() {}
+void Router::writeSolution() {
+
+
+    cout << "Finish Write Result" << endl;
+}

@@ -22,6 +22,8 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 set(CMAKE_CXX_STANDARD 14)
 
 set(PATH_CTR ${CMAKE_CURRENT_SOURCE_DIR})
+set(PATH_ALGLIB ${CMAKE_CURRENT_SOURCE_DIR}/../alglib)
+
 
 ###################
 # Warnings/Errors #
@@ -37,11 +39,13 @@ set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Werror=return-type")
 ###############
 # Source Code #
 ###############
+file(GLOB_RECURSE SRC_FILES_ALGLIB
+    ${PATH_ALGLIB}/src/*.cpp)
 
 file(GLOB_RECURSE SRC_FILES_CTR
     ${PATH_CTR}/*.cpp)
 
-set(SRC_FILES  ${SRC_FILES_CTR})
+set(SRC_FILES  ${SRC_FILES_CTR} ${SRC_FILES_ALGLIB})
 
 #################
 # Library Paths #
@@ -60,6 +64,7 @@ add_executable(CTRouter ${SRC_FILES})
 #######################
 
 include_directories(${PATH_CTR})
+include_directories(${PATH_ALGLIB}/src)
 
 #################
 # Linker Flags  #
