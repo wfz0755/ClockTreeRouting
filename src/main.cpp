@@ -4,8 +4,9 @@
 using namespace std;
 
 //Nearest matching + DME
+Setting setting;
+
 int main(int argc, char *argv[]){
-    Setting setting;
 
     cout << "Handling Task One: CLOCK SRC-TAPS ROUTING " << endl;
     cout << "Input file name" << argv[1] << endl;
@@ -16,8 +17,6 @@ int main(int argc, char *argv[]){
     
     setting.input_file_name= input_file_name;
     setting.output_file_name = output_file_name;
-    if(argc >3)
-        setting.metric = atoi(argv[4]);
 
     Router router;
     router.init();

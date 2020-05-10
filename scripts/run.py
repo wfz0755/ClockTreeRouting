@@ -42,8 +42,8 @@ print('The following benchmarks will be run: ', bms)
 
 
 def run_binary():
-    run('/usr/bin/time -v ./{0} {1} {2} dummyTask2Out {3}  |& tee {4}.log'.format(
-        binary, file_name, args.outfile, args.metric, bm.full_name))
+    run('/usr/bin/time -v ./{0} {1} {2} dummyTask2Out |& tee {3}.log'.format(
+        binary, file_name, args.outfile, bm.full_name))
 
     run('mv *.log  {} 2>/dev/null'.format(bm_log_dir))
 

@@ -2,7 +2,6 @@
 #include "Setting.h"
 
 using namespace std;
-
 void Router::init() {
     // read input and build data structure
     ifstream fin(setting.input_file_name);
@@ -20,17 +19,20 @@ void Router::init() {
             MAX_RUNTIME = stoi(line.substr(line.find(" ") + 1));
             cout << "MAX_RUNTIME: " << MAX_RUNTIME << endl;
         }
-        if (iss.str().find("TAPS") != std::string::npos) {
+        
+        if (iss.str().find("END TAPS") != std::string::npos) {
+            break;
+        }
+        else if (iss.str().find("TAPS") != std::string::npos) {
             NUM_TAPS = stoi(line.substr(line.find(" ") + 1));
             cout << "NUM_TAPS: " << NUM_TAPS << endl;
         }
         else if(iss.str().find("TAP") != std::string::npos){
-            int tap_id = stoi(line.substr(line.find(" ") + 1));
-            int x = stoi(line.substr(line.find(" ") + 2));
-            int y = stoi(line.substr(line.find(" ") + 3));
+            char buf[10];
+            int tap_id,x,y;
+            iss >> buf >> tap_id >> x >> y;
             taps.emplace_back(tap_id,x,y);
         }
-        if (iss.str().find("END TAPS") != std::string::npos) break;
     }
     for(auto & tap: taps){
         cout << tap << endl;
