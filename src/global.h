@@ -3,6 +3,7 @@
 // STL libraries
 #include <iostream>
 #include <fstream>
+#include <cassert>
 #include <sstream>
 #include <memory>
 #include <string>
