@@ -20,6 +20,7 @@ int main(int argc, char *argv[]){
     Router router;
     router.init();
     router.route();
+    router.buildSolution();
     router.writeSolution();
     
     cout << "End of Process" << endl;

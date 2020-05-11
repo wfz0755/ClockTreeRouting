@@ -79,9 +79,9 @@ public:
         //     if (abs((rhs.p1.y - p1.y) * (p2.x - p1.x) - (p2.y - p1.y) * (rhs.p1.x - p1.x)) < eps) {
         if (rhs.isLeaf()) {  // if current segment is intersecting a single grid point
             Segment ret = rhs;
-            if(abs((rhs.p1.y - p1.y) * (p2.x - p1.x) - (p2.y - p1.y) * (rhs.p1.x - p1.x)) < eps){
-            // if ((rhs.p1.y - p1.y) * (p2.x - p1.x) == (p2.y - p1.y) * (rhs.p1.x - p1.x)) {
-                if (p1.y-eps <= rhs.p1.y && rhs.p1.y <= p2.y+eps) {  // valid intersection
+            if (abs((rhs.p1.y - p1.y) * (p2.x - p1.x) - (p2.y - p1.y) * (rhs.p1.x - p1.x)) < eps) {
+                // if ((rhs.p1.y - p1.y) * (p2.x - p1.x) == (p2.y - p1.y) * (rhs.p1.x - p1.x)) {
+                if (p1.y - eps <= rhs.p1.y && rhs.p1.y <= p2.y + eps) {  // valid intersection
                     Segment ret = rhs;
                     ret.id = -2;  // return single point intersection
                     return ret;
@@ -105,8 +105,12 @@ public:
                     lower = p1;
                 }
                 if (upper.y < lower.y) {
-                    cout << "No overlap between two segs on the line" << endl;
-                    exit(1);
+                    Segment ret;
+                    ret.id = -1;
+                    return ret;
+
+                    // cout << "No overlap between two segs on the line" << endl;
+                    // exit(1);
                 }
                 return Segment(lower, upper);
             } else {
@@ -142,7 +146,8 @@ public:
             // }else if(abs(x-rhs.p2.x) <= 0.5 && abs(y-rhs.p2.y) <= 0.5){
 
             // }
-            if (p1.y-eps <= y && y <= p2.y+eps && rhs.p1.y-eps <= y && y <= rhs.p2.y+eps) {  // valid intersection
+            if (p1.y - eps <= y && y <= p2.y + eps && rhs.p1.y - eps <= y &&
+                y <= rhs.p2.y + eps) {  // valid intersection
 
                 ret.p1 = GridPoint(x, y);
                 ret.p2 = GridPoint(x, y);
@@ -176,14 +181,9 @@ public:
             trr_Sides.emplace_back(trr_boundary_grid[i], trr_boundary_grid[i + 1]);
         }
         trr_Sides.emplace_back(trr_boundary_grid[3], trr_boundary_grid[0]);
-
-        cout << "Core is " << core << endl;
-        cout << "Print trr's sides" << endl;
-        for (auto& seg1 : trr_Sides) {
-            cout << seg1 << endl;
-        }
-        cout << "MS:" << seg << endl;
-
+        // for (auto& seg1 : trr_Sides) {
+        //     cout << seg1 << endl;
+        // }
         for (auto& side : trr_Sides) {
             Segment intersection = side.intersect(seg);
             if (intersection.id != -1) {
@@ -230,6 +230,25 @@ public:
     void refineStructure(int iter = 10000);
 };
 
+class GrSteiner : public GridPoint {
+public:
+    // shared_ptr<GrSteiner> lc;
+    // shared_ptr<GrSteiner> rc;
+    shared_ptr<GrSteiner> par;
+
+    GrSteiner(GridPoint p){
+        x = p.x;
+        y= p.y;
+        // lc = NULL;
+        // rc = NULL;
+        par = NULL;
+    }
+
+    // void set_lc(shared_ptr<GrSteiner> child) { lc = child; }
+    // void set_rc(shared_ptr<GrSteiner> child) { rc = child; }
+    void set_par(shared_ptr<GrSteiner> p) { par = p; }
+};
+
 class Router {
 public:
     int MAX_RUNTIME = 3600;  // test 1
@@ -243,9 +262,10 @@ public:
     // Structures to store the final routing result
     GridPoint clockSource;
     vector<GridPoint> pl;
-    vector<vector<GridPoint>> sol;
+    vector<shared_ptr<GrSteiner>> sol;
+        // vector<vector<GridPoint>> sol;
 
-    void init();
+        void init();
     void readInput();
     // To generate topology(try L1 based metric and L2 based ones)
     void NS();          // nearest neighbor topology
@@ -258,6 +278,6 @@ public:
     void DME();  // Deferred-Merge Embedding
 
     void route();
-
+    void buildSolution();
     void writeSolution();
 };

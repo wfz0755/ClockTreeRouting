@@ -233,7 +233,7 @@ Segment TRRintersect(TRR& trr1, TRR& trr2) {
 // Deferred-Merge Embedding
 void Router::DME() {
     // Segment seg1(GridPoint(1.0,3.0),GridPoint(2.0,4.0));
-    
+
     // Segment seg2(GridPoint(-0.5,6.5),GridPoint(6,0));
 
     // cout << seg1.intersect(seg2) << endl;
@@ -256,7 +256,7 @@ void Router::DME() {
             // get |e_a|, |e_b|
             double d = min(L1Dist(ms_a.p1, ms_b.p1), L1Dist(ms_a.p1, ms_b.p2));
             d = min(d, L1Dist(ms_a.p2, ms_b.p1));
-            d = min(d, L1Dist(ms_a.p2, ms_b.p2)); // but why need to calc 2*2 possiblity?
+            d = min(d, L1Dist(ms_a.p2, ms_b.p2));  // but why need to calc 2*2 possiblity?
             double e_a_dist = (ms_b.delay - ms_a.delay + d) / 2;
             double e_b_dist = (ms_a.delay - ms_b.delay + d) / 2;
             if (e_a_dist < 0 || e_b_dist < 0) {
@@ -287,11 +287,11 @@ void Router::DME() {
         }
     };
     postOrderTraversal(topo->root);
-    cout << padding << "Finish bottom-up process" << padding << endl;
+    cout  << "Finish bottom-up process"  << endl;
 
     // 2. Find Exact Placement(top down)
     pl.resize(topo->size);
-    sol.resize(topo->leafNumber);
+    sol.resize(topo->size);
     auto& rootMS = vertexMS[topo->root->id];
 
     std::function<void(shared_ptr<TreeNode>)> preOrderTraversal = [&](shared_ptr<TreeNode> curNode) {
@@ -314,7 +314,7 @@ void Router::DME() {
                 auto& trr_par = vertexTRR[parId];
                 trr_par.core = Segment(pl[parId], pl[parId]);
                 trr_par.radius = vertexDistE[curId];
-                
+
                 // cout <<std::fixed<< "Before merge: the value for trr_par is" << setprecision(2) << trr_par << endl;
                 // if(trr_par.radius == 122663.50){
                 //     cout << 3 << endl;
@@ -342,16 +342,85 @@ void Router::DME() {
         }
     };
     preOrderTraversal(topo->root);
-    cout << padding << "Finish top-down process" << padding << endl;
+    cout  << "Finish top-down process"  << endl;
 
     cout << padding << "Finished DME" << padding << endl;
-    cout << padding << "Total Wire Length: " << padding << endl;
 }
 
 void Router::route() {
     HC();  // try hierarchical clustering
     DME();
-    cout << padding << "Finish Routing" << padding << endl;
+}
+bool db_equal(double a, double b) { return abs(a - b) < eps; }
+void Router::buildSolution() {
+    // preorder traversal to buil grsteiner structure
+    std::function<void(shared_ptr<TreeNode>)> preOrderTraversal = [&](shared_ptr<TreeNode> curNode) {
+        int curId = curNode->id;
+        if (curNode->lc != NULL && curNode->rc != NULL) {
+            // handle curNode
+            shared_ptr<GrSteiner>& curSteiner = sol[curId];
+            auto& lc = curNode->lc;
+            auto& rc = curNode->rc;
+            shared_ptr<GrSteiner> lcSteiner = make_shared<GrSteiner>(pl[lc->id]);
+            shared_ptr<GrSteiner> rcSteiner = make_shared<GrSteiner>(pl[rc->id]);
+
+            // Connect lc
+            if (db_equal(curSteiner->x, lcSteiner->x) || db_equal(curSteiner->y, lcSteiner->y)) {
+                lcSteiner->set_par(curSteiner);
+            } else {  // Use L-shape
+                shared_ptr<GrSteiner> middle = make_shared<GrSteiner>(GridPoint(curSteiner->x, lcSteiner->y));
+                lcSteiner->set_par(middle);
+                middle->set_par(curSteiner);
+            }
+            if (db_equal(curSteiner->x, rcSteiner->x) || db_equal(curSteiner->y, rcSteiner->y)) {
+                rcSteiner->set_par(curSteiner);
+            } else {  // Use L-shape
+                shared_ptr<GrSteiner> middle = make_shared<GrSteiner>(GridPoint(curSteiner->x, rcSteiner->y));
+                rcSteiner->set_par(middle);
+                middle->set_par(curSteiner);
+            }
+            sol[lc->id] = lcSteiner;
+            sol[rc->id] = rcSteiner;
+            preOrderTraversal(lc);
+            preOrderTraversal(rc);
+        } else {
+            // sinks
+            // pl[curId] = vertexMS[curId].p1;
+            return;
+        }
+    };
+    sol[topo->root->id] = make_shared<GrSteiner>(pl[topo->root->id]);
+    preOrderTraversal(topo->root);
 }
 
-void Router::writeSolution() { cout << padding << "Finish Write Result" << padding << endl; }
+void Router::writeSolution() {
+    ofstream fout(setting.output_file_name);
+    if (fout.fail()) {
+        cout << "Fail to open file:" << setting.output_file_name << endl;
+        exit(1);
+    } else {
+        cout << padding << "Successfully open input:" << setting.output_file_name << padding << endl;
+    }
+
+    std::function<void(shared_ptr<GrSteiner>, double& wl)> traceToSource = [&](shared_ptr<GrSteiner> curNode,
+                                                                               double& wl) {
+        fout << *curNode << " ";
+        if (curNode->par == NULL) {  // reached source
+            return;
+        }
+        auto &nxtNode = curNode->par;
+        wl += L1Dist(*curNode,*nxtNode);
+        traceToSource(nxtNode, wl);
+    };
+
+    vector<double> wirelenghs(taps.size(), 0);
+    fout << std::fixed << setprecision(2) << clockSource << endl;
+    for (int tapId = 0; tapId < taps.size(); tapId++) {
+        fout << tapId << " ";
+        traceToSource(sol[tapId], wirelenghs[tapId]);
+        cout << std::fixed << setprecision(2) << "WL for tap" << tapId << ": " << wirelenghs[tapId] << endl;
+        fout << endl;
+    }
+    // check wirelength
+    cout << padding << "Finish Write Result" << padding << endl;
+}
