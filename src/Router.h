@@ -2,7 +2,7 @@
 #include "global.h"
 using namespace std;
 
-const double eps = 1e-6;
+const double eps = 1e-4;
 
 class GridPoint {
 public:
@@ -75,10 +75,24 @@ public:
         double rhs_slope = rhs.slope();
 
         // check if 4 points same line
+        // if (abs(cur_slope - rhs_slope) < eps) {
+        //     if (abs((rhs.p1.y - p1.y) * (p2.x - p1.x) - (p2.y - p1.y) * (rhs.p1.x - p1.x)) < eps) {
+        if (rhs.isLeaf()) {  // if current segment is intersecting a single grid point
+            Segment ret = rhs;
+            if(abs((rhs.p1.y - p1.y) * (p2.x - p1.x) - (p2.y - p1.y) * (rhs.p1.x - p1.x)) < eps){
+            // if ((rhs.p1.y - p1.y) * (p2.x - p1.x) == (p2.y - p1.y) * (rhs.p1.x - p1.x)) {
+                if (p1.y-eps <= rhs.p1.y && rhs.p1.y <= p2.y+eps) {  // valid intersection
+                    Segment ret = rhs;
+                    ret.id = -2;  // return single point intersection
+                    return ret;
+                }
+            }
+            ret.id = -1;
+            return ret;
+        }
         if (abs(cur_slope - rhs_slope) < eps) {
             if (abs((rhs.p1.y - p1.y) * (p2.x - p1.x) - (p2.y - p1.y) * (rhs.p1.x - p1.x)) < eps) {
-                // if (cur_slope == rhs_slope) {
-                // if ((rhs.p1.y - p1.y) * (p2.x - p1.x) == (p2.y - p1.y) * (rhs.p1.x - p1.x)) {
+                assert(rhs.p1.y <= rhs.p2.y && p1.y <= p2.y);
                 GridPoint upper, lower;
                 if (rhs.p2.y < p2.y) {
                     upper = rhs.p2;
@@ -103,20 +117,36 @@ public:
         } else {
             // might be 1 point or 0
             double A1 = p2.y - p1.y;
-            double B1 = p2.x - p1.x;
+            // double B1 = p2.x - p1.x;
+            double B1 = p1.x - p2.x;
             double C1 = A1 * p1.x + B1 * p1.y;
             double A2 = rhs.p2.y - rhs.p1.y;
-            double B2 = rhs.p2.x - rhs.p1.x;
+            // double B2 = rhs.p2.x - rhs.p1.x;
+            double B2 = rhs.p1.x - rhs.p2.x;
             double C2 = A2 * rhs.p1.x + B2 * rhs.p1.y;
             double det = A1 * B2 - A2 * B1;
             double x = (B2 * C1 - B1 * C2) / det;
             double y = (A1 * C2 - A2 * C1) / det;
 
             Segment ret;
-            if (p1.y <= y && y <= p2.y) {  // valid intersection
+            // if (p1.y-eps <= y && y <= p2.y +eps) {  // valid intersection
+            // if(abs(x-p1.x) <= 0.5 && abs(y-p1.y) <= 0.5){
+            //     ret.p1 = p1;
+            //     ret.p2 = p1;
+            //     ret.id = -3;
+            // }else if(abs(x-p2.x) <= 0.5 && abs(y-p2.y) <= 0.5){
+
+            // }
+            // else if(abs(x-rhs.p1.x) <= 0.5 && abs(y-rhs.p1.y) <= 0.5){
+
+            // }else if(abs(x-rhs.p2.x) <= 0.5 && abs(y-rhs.p2.y) <= 0.5){
+
+            // }
+            if (p1.y-eps <= y && y <= p2.y+eps && rhs.p1.y-eps <= y && y <= rhs.p2.y+eps) {  // valid intersection
+
                 ret.p1 = GridPoint(x, y);
                 ret.p2 = GridPoint(x, y);
-                ret.id = -2; // return single point intersection
+                ret.id = -2;  // return single point intersection
             } else {
                 ret.id = -1;
             }
@@ -146,10 +176,18 @@ public:
             trr_Sides.emplace_back(trr_boundary_grid[i], trr_boundary_grid[i + 1]);
         }
         trr_Sides.emplace_back(trr_boundary_grid[3], trr_boundary_grid[0]);
+
+        cout << "Core is " << core << endl;
+        cout << "Print trr's sides" << endl;
+        for (auto& seg1 : trr_Sides) {
+            cout << seg1 << endl;
+        }
+        cout << "MS:" << seg << endl;
+
         for (auto& side : trr_Sides) {
             Segment intersection = side.intersect(seg);
             if (intersection.id != -1) {
-                return seg;
+                return intersection;
             }
         }
         Segment ret;

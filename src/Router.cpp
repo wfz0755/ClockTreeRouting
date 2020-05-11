@@ -3,6 +3,7 @@
 
 using std::cout;
 using std::endl;
+using std::setprecision;
 
 #define COMPLETE_LINKAGE 0
 #define SINGLE_LINKAGE 1
@@ -158,7 +159,7 @@ inline double L1Dist(GridPoint p1, GridPoint p2) { return abs(p1.x - p2.x) + abs
 
 Segment TRRintersect(TRR& trr1, TRR& trr2) {
     // get four edges
-    cout << "Merging: " << trr1 << " and " << trr2 << endl;
+    // cout << "Merging: " << trr1 << " and " << trr2 << endl;
     vector<GridPoint> trr1_boundary_grid;
     vector<GridPoint> trr2_boundary_grid;
     vector<Segment> trr1_Sides;
@@ -204,16 +205,16 @@ Segment TRRintersect(TRR& trr1, TRR& trr2) {
     trr1_Sides.emplace_back(trr1_boundary_grid[3], trr1_boundary_grid[0]);
     trr2_Sides.emplace_back(trr2_boundary_grid[3], trr2_boundary_grid[0]);
 
-    cout << "Print trr1's sides" << endl;
-    for (auto& seg1 : trr1_Sides) {
-        cout << seg1 << endl;
-    }
+    // cout << "Print trr1's sides" << endl;
+    // for (auto& seg1 : trr1_Sides) {
+    //     cout << seg1 << endl;
+    // }
 
-    cout << "Print trr2's sides" << endl;
+    // cout << "Print trr2's sides" << endl;
 
-    for (auto& seg2 : trr2_Sides) {
-        cout << seg2 << endl;
-    }
+    // for (auto& seg2 : trr2_Sides) {
+    //     cout << seg2 << endl;
+    // }
 
     // for 4*4 check intersect
     for (auto& seg1 : trr1_Sides) {
@@ -231,6 +232,13 @@ Segment TRRintersect(TRR& trr1, TRR& trr2) {
 }
 // Deferred-Merge Embedding
 void Router::DME() {
+    // Segment seg1(GridPoint(1.0,3.0),GridPoint(2.0,4.0));
+    
+    // Segment seg2(GridPoint(-0.5,6.5),GridPoint(6,0));
+
+    // cout << seg1.intersect(seg2) << endl;
+    // exit(1);
+
     vertexMS.resize(topo->size);
     vertexTRR.resize(topo->size);
     vertexDistE.resize(topo->size);
@@ -248,7 +256,7 @@ void Router::DME() {
             // get |e_a|, |e_b|
             double d = min(L1Dist(ms_a.p1, ms_b.p1), L1Dist(ms_a.p1, ms_b.p2));
             d = min(d, L1Dist(ms_a.p2, ms_b.p1));
-            d = min(d, L1Dist(ms_a.p2, ms_b.p2));
+            d = min(d, L1Dist(ms_a.p2, ms_b.p2)); // but why need to calc 2*2 possiblity?
             double e_a_dist = (ms_b.delay - ms_a.delay + d) / 2;
             double e_b_dist = (ms_a.delay - ms_b.delay + d) / 2;
             if (e_a_dist < 0 || e_b_dist < 0) {
@@ -265,7 +273,7 @@ void Router::DME() {
             vertexTRR[curNode->rc->id] = trr_b;
             // intersect trr_a, trr_b to get ms_v
             Segment ms_v = TRRintersect(trr_a, trr_b);
-            cout << "Merging result: " << ms_v << endl;
+            // cout << "Merging result: " << ms_v << endl;
             if (ms_v.id == -1) {
                 cout << "Merge failure" << endl;
                 exit(1);
@@ -282,7 +290,6 @@ void Router::DME() {
     cout << padding << "Finish bottom-up process" << padding << endl;
 
     // 2. Find Exact Placement(top down)
-
     pl.resize(topo->size);
     sol.resize(topo->leafNumber);
     auto& rootMS = vertexMS[topo->root->id];
@@ -293,15 +300,31 @@ void Router::DME() {
         if (curNode->lc != NULL && curNode->rc != NULL) {
             // handle curNode
             if (curNode == topo->root) {
+                GridPoint tmp;
+                // tmp.x = (rootMS.p1.x + rootMS.p2.x) /2;
+                // tmp.y = (rootMS.p1.y + rootMS.p2.y) /2;
                 clockSource = rootMS.p1;
                 pl[curId] = rootMS.p1;
+
+                //  clockSource = tmp;
+                // pl[curId] = tmp;
             } else {
                 auto& par = curNode->par;
                 int parId = par->id;
                 auto& trr_par = vertexTRR[parId];
                 trr_par.core = Segment(pl[parId], pl[parId]);
                 trr_par.radius = vertexDistE[curId];
+                
+                // cout <<std::fixed<< "Before merge: the value for trr_par is" << setprecision(2) << trr_par << endl;
+                // if(trr_par.radius == 122663.50){
+                //     cout << 3 << endl;
+                // }
                 Segment merged = trr_par.intersect(vertexMS[curId]);
+                // if(merged.isLeaf() == false){
+                //     cout << trr_par << " intersecting "<< vertexMS[curId] <<  endl;
+                //     cout << " Not leaf" <<endl;
+                //     cout << merged << endl;
+                // }
                 if (merged.id == -1) {
                     cout << "TRR-MS merging failed" << endl;
                     exit(1);
