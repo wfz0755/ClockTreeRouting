@@ -393,6 +393,30 @@ void Router::buildSolution() {
     preOrderTraversal(topo->root);
 }
 
+
+// void Router::reportTotalWL() {
+
+
+//     std::function<void(shared_ptr<GrSteiner>, double&)> preOrderTraversal = [&](shared_ptr<GrSteiner> curNode,double& wl) {
+
+//         if (curNode->lc != NULL && curNode->rc != NULL) {
+        
+//         }
+//         if (curNode->par == NULL) {  // reached source
+//             return;
+//         }
+//         auto &nxtNode = curNode->par;
+//         wl += L1Dist(*curNode,*nxtNode);
+//         preOrderTraversal(nxtNode, wl);
+//     };
+//     double total_wl = 0;
+    
+    
+//     // check wirelength
+//     cout << padding << "Finish Write Result" << padding << endl;
+// }
+
+
 void Router::writeSolution() {
     ofstream fout(setting.output_file_name);
     if (fout.fail()) {
@@ -401,6 +425,8 @@ void Router::writeSolution() {
     } else {
         cout << padding << "Successfully open input:" << setting.output_file_name << padding << endl;
     }
+    double total_wl = 0;
+    set< PointPair > calculated_edges;
 
     std::function<void(shared_ptr<GrSteiner>, double& wl)> traceToSource = [&](shared_ptr<GrSteiner> curNode,
                                                                                double& wl) {
@@ -410,9 +436,15 @@ void Router::writeSolution() {
         }
         auto &nxtNode = curNode->par;
         wl += L1Dist(*curNode,*nxtNode);
+        PointPair tmp(curNode->x,curNode->y,nxtNode->x,nxtNode->y);
+        if(calculated_edges.find(tmp) == calculated_edges.end()){
+            calculated_edges.insert(tmp);
+            total_wl += L1Dist(*curNode,*nxtNode);
+        }
         traceToSource(nxtNode, wl);
     };
 
+    
     vector<double> wirelenghs(taps.size(), 0);
     fout << std::fixed << setprecision(2) << clockSource << endl;
     for (int tapId = 0; tapId < taps.size(); tapId++) {

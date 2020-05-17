@@ -4,6 +4,32 @@ using namespace std;
 
 const double eps = 1e-4;
 
+class PointPair {
+    // V_{i,k,n}
+public:
+    double x1,x2,y1,y2;  // from:(x1,y1), to: (x2,y2)
+    PointPair(double _x1,double _x2,double _y1,double _y2) : x1(_x1), y1(_y1), x2(_x2),y2(_y2) {}
+    bool operator==(PointPair const& var) const { return (x1 == var.x1 && y1 == var.y1 && x2 == var.x2 && y2 == var.y2); }
+};
+
+struct PointPairHasher {
+    std::size_t operator()(const PointPair& var) const {
+        using boost::hash_combine;
+        using boost::hash_value;
+        // Start with a hash value of 0.
+        std::size_t value = 0;
+        // Modify 'seed' by XORing and bit-shifting in
+        // one member of 'node' after the other:
+        hash_combine(value, hash_value(var.x1));
+        hash_combine(value, hash_value(var.y1));
+        hash_combine(value, hash_value(var.x2));
+        hash_combine(value, hash_value(var.y2));
+        // Return the result.
+        return value;
+    }
+};
+
+
 class GridPoint {
 public:
     double x, y;
@@ -232,20 +258,20 @@ public:
 
 class GrSteiner : public GridPoint {
 public:
-    // shared_ptr<GrSteiner> lc;
-    // shared_ptr<GrSteiner> rc;
+    shared_ptr<GrSteiner> lc;
+    shared_ptr<GrSteiner> rc;
     shared_ptr<GrSteiner> par;
 
     GrSteiner(GridPoint p){
         x = p.x;
         y= p.y;
-        // lc = NULL;
-        // rc = NULL;
+        lc = NULL;
+        rc = NULL;
         par = NULL;
     }
 
-    // void set_lc(shared_ptr<GrSteiner> child) { lc = child; }
-    // void set_rc(shared_ptr<GrSteiner> child) { rc = child; }
+    void set_lc(shared_ptr<GrSteiner> child) { lc = child; }
+    void set_rc(shared_ptr<GrSteiner> child) { rc = child; }
     void set_par(shared_ptr<GrSteiner> p) { par = p; }
 };
 
@@ -279,5 +305,6 @@ public:
 
     void route();
     void buildSolution();
+    void reportTotalWL();
     void writeSolution();
 };
