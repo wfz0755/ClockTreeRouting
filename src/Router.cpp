@@ -454,5 +454,6 @@ void Router::writeSolution() {
         fout << endl;
     }
     // check wirelength
+    cout << "Total Wirelength: " << total_wl << endl;
     cout << padding << "Finish Write Result" << padding << endl;
 }
