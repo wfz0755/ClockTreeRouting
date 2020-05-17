@@ -8,6 +8,7 @@ class PointPair {
     // V_{i,k,n}
 public:
     double x1,x2,y1,y2;  // from:(x1,y1), to: (x2,y2)
+    PointPair(){}
     PointPair(double _x1,double _x2,double _y1,double _y2) : x1(_x1), y1(_y1), x2(_x2),y2(_y2) {}
     bool operator==(PointPair const& var) const { return (x1 == var.x1 && y1 == var.y1 && x2 == var.x2 && y2 == var.y2); }
 };

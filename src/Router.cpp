@@ -426,7 +426,7 @@ void Router::writeSolution() {
         cout << padding << "Successfully open input:" << setting.output_file_name << padding << endl;
     }
     double total_wl = 0;
-    set< PointPair > calculated_edges;
+    std::unordered_set< PointPair, PointPairHasher> calculated_edges;
 
     std::function<void(shared_ptr<GrSteiner>, double& wl)> traceToSource = [&](shared_ptr<GrSteiner> curNode,
                                                                                double& wl) {
