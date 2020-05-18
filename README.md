@@ -7,6 +7,8 @@ Use Hierarchical Clustering to build topology and then apply Deferred-Merge Embe
 To do hierarchical clustering, ALGLIB library is used.  
 Ref: https://www.alglib.net/
 
+## NOTES
+Boost library is used simply to help us print the total wirelength. 
 
 ## Compile
 
